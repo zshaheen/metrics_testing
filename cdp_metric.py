@@ -34,18 +34,36 @@ class CDPMetric():
             def compute(self):
                 pass
         compound_metric = CompoundMetric('CompoundMetric')
-        self._merge_values_dict_into_first(compound_metric, self)
-        self._merge_values_dict_into_first(compound_metric, other)
+        self._add_values_dict_into_first(compound_metric, self)
+        self._add_values_dict_into_first(compound_metric, other)
+        return compound_metric
+
+    def __sub__(self, other):
+        class CompoundMetric(CDPMetric):
+            def compute(self):
+                pass
+        if not self._is_compound():
+            raise TypeError('First operand must be a CompoundMetric')
+        compound_metric = CompoundMetric('CompoundMetric')
+        self._add_values_dict_into_first(compound_metric, self)
+        self._subtract_values_dict_into_first(compound_metric, other)
         return compound_metric
 
     def _is_compound(self):
         return len(self._values) > 1
 
-    def _merge_values_dict_into_first(self, compound_metric, other_metric):
+    def _add_values_dict_into_first(self, compound_metric, other_metric):
         """ Merges the _values dict of two objects of type CDPMetric
         into the first. """
         for key, value in other_metric._values.items():
             compound_metric._values[key] = value
+
+    def _subtract_values_dict_into_first(self, compound_metric, other_metric):
+        """ Removes the elements of the _values dict of the second
+        object from the first object's _values dict. """
+        for key in other_metric._values:
+            if compound_metric._values.pop(key, None) is None:
+                print "Could not subtract %s metric since it's not in the first operand." % key
 
     @abc.abstractmethod
     def compute(self):
