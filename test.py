@@ -1,11 +1,8 @@
 import add
 import sub
 
-metric = add.Add(1, 2)
-metric2 = sub.Sub(1, 2)
+metric = add.Add()
+metric2 = sub.Sub()
 compound =  metric + metric2
-print compound()
-print metric()
-#print metric2()
-
-#print metric + metric2
+print compound(3, 4)
+print metric(1,1)

@@ -9,32 +9,31 @@ class CDPMetric():
     def __init__(self, metric_path):
         # Important variables
         # metric_path: printed when this metric is used. Let's users know which metric is being used
-        # name: the name of the metric
         # _values: dictionary of the values. This allows for compound metrics. Explain more.
-        #self.logger = logging.getLogger(__name__)
-        #self.logger.setLevel(logging.DEBUG)
         self.metric_path = metric_path
         # get the filename from /path/to/filename.py
         name_with_py = self.metric_path.split('/')[-1]
         name = name_with_py.split('.')[0]
-        self._values = {name: self.compute}
+        self._values = {name: self}
 
-    def __call__(self):
+    def __call__(self, *args, **kwargs):
         self.show_metric_information()
         if self._is_compound():
+            # Remove the 'CompoundMetric' key from the _values
+            self._values.pop('CompoundMetric')
             # loop through and calculate all of the metrics
             for key, value in self._values.items():
                 # replaces the function with the actual value
-                self._values[key] = value()
+                self._values[key] = value(*args, **kwargs)
             return self._values
         else:
-            return self.compute()
+            return self.compute(*args, **kwargs)
 
     def __add__(self, other):
         class CompoundMetric(CDPMetric):
             def compute(self):
                 pass
-        compound_metric = CompoundMetric('a compound CDPMetric')
+        compound_metric = CompoundMetric('CompoundMetric')
         self._merge_values_dict_into_first(compound_metric, self)
         self._merge_values_dict_into_first(compound_metric, other)
         return compound_metric
@@ -56,7 +55,4 @@ class CDPMetric():
     def show_metric_information(self):
         """ Displays information about this metric so that a user
         can easily identify what metrics are being used. """
-        #self.logger.info(self.metric_path)
-        #print sys.modules[__name__]
-        #print __file__
         print 'Using metric: ' + self.metric_path
